@@ -12,8 +12,13 @@ wfs.js - html5 player for raw h.264 streams.
 git clone https://github.com/ChihChengYang/wfs.js.git
 
 ** wfs.js **
+1. setup node.js/npm dev environement
+2. cd wfs.js
+3. npm install
+4. npm run build
  
 ** demo server ** 
+1. setup go dev environement
 go get "github.com/gorilla/websocket" 
 go get "github.com/satori/go.uuid"
 2. ./server/build_lite.sh
