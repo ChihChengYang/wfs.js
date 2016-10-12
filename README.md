@@ -24,13 +24,13 @@ git clone https://github.com/ChihChengYang/wfs.js.git
  
 **demo server**  
 
-1. setup go dev environement  
+Setup go's dev environement  
 
 go get "github.com/gorilla/websocket"  
   
 go get "github.com/satori/go.uuid"  
 
-2. ./server/build_lite.sh  
+./server/build_lite.sh  
 
 
 Demo server serves with raw h.264 files,
