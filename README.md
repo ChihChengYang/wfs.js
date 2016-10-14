@@ -6,8 +6,8 @@ wfs.js - html5 player for raw h.264 streams.
  
  It works by transmuxing H264 NAL unit into ISO BMFF (MP4) fragments.
 
- Also,Implement a demo server to push video streams. 
-
+ Also,Implement a demo server to push video streams.   
+ 
 ##  Build
 git clone https://github.com/ChihChengYang/wfs.js.git
 
@@ -41,7 +41,9 @@ yet that can be easily transfered and connected to RTSP or other sources (h.264 
 
 2. open a browser e.g. Chrome , 127.0.0.1:8888  
 
- 
+##  Reference
+
+[hls.js](https://github.com/dailymotion/hls.js "hls.js")
 
 	
 	
