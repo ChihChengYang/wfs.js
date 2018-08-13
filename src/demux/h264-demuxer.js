@@ -1,7 +1,6 @@
 /**
 
 */
-import {ErrorTypes, ErrorDetails} from '../errors';
 import Event from '../events';
 import ExpGolomb from './exp-golomb';
 import EventHandler from '../event-handler';
@@ -16,10 +15,6 @@ class h264Demuxer extends EventHandler {
     this.config = this.wfs.config || config;
     this.wfs = wfs;
     this.id = 'main';
-    var typeSupported = {
-      mp4 : MediaSource.isTypeSupported('video/mp4')//,
-     // mp2t : wfs.config.enableMP2TPassThrough && MediaSource.isTypeSupported('video/mp2t')
-    };
  
     this.remuxer = new MP4Remuxer(this.wfs, this.id , this.config);   
     this.contiguous = true; 
@@ -48,15 +43,10 @@ class h264Demuxer extends EventHandler {
 
   onH264DataParsing(event){ 
     this._parseAVCTrack( event.data); 
-    if (this.browserType === 1){ // Firefox
+    if (this.browserType === 1 || this._avcTrack.samples.length >= 20){ // Firefox
       this.remuxer.pushVideo(0, this.sn, this._avcTrack, this.timeOffset, this.contiguous);
       this.sn += 1;
-    }else{ 
-      if ( this._avcTrack.samples.length >= 20){
-        this.remuxer.pushVideo(0, this.sn, this._avcTrack, this.timeOffset, this.contiguous);
-        this.sn += 1;
-      }
-    } 
+    }
   } 
 
   _parseAVCTrack(array) {

@@ -8,7 +8,6 @@ import FlowController from  './controller/flow-controller';
 import BufferController from  './controller/buffer-controller';
 import EventEmitter from 'events';
 import XhrLoader from './utils/xhr-loader';
-import FileLoader from './loader/file-loader';
 import WebsocketLoader from './loader/websocket-loader';
 
 
