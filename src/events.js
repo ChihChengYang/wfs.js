@@ -17,6 +17,8 @@ module.exports = {
   FRAG_PARSING_INIT_SEGMENT: 'wfsFragParsingInitSegment',
 //------------------------------------------
   H264_DATA_PARSING: 'wfsH264DataParsing',
+
+  H264_DATA_PARSED: 'wfsH264DataParsed',
 //------------------------------------------
   WEBSOCKET_ATTACHED: 'wfsWebsocketAttached',
 

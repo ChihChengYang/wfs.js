@@ -10,7 +10,7 @@ class h264Demuxer extends EventHandler {
   
   constructor(wfs, config=null) {
     super(wfs, 
-      Event.H264_DATA_PARSING);
+      Event.H264_DATA_PARSED);
 
     this.config = this.wfs.config || config;
     this.wfs = wfs;
@@ -41,7 +41,7 @@ class h264Demuxer extends EventHandler {
     return  this.timestamp;
   }
 
-  onH264DataParsing(event){ 
+  onH264DataParsed(event){ 
     this._parseAVCTrack( event.data); 
     if (this.browserType === 1 || this._avcTrack.samples.length >= 20){ // Firefox
       this.remuxer.pushVideo(0, this.sn, this._avcTrack, this.timeOffset, this.contiguous);

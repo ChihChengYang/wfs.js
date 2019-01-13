@@ -1,4 +1,4 @@
-(function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.Wfs = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+(function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.Wfs = f()}})(function(){var define,module,exports;return (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -1028,8 +1028,6 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _errors = require('../errors');
-
 var _events = require('../events');
 
 var _events2 = _interopRequireDefault(_events);
@@ -1065,15 +1063,11 @@ var h264Demuxer = function (_EventHandler) {
 
     _classCallCheck(this, h264Demuxer);
 
-    var _this = _possibleConstructorReturn(this, (h264Demuxer.__proto__ || Object.getPrototypeOf(h264Demuxer)).call(this, wfs, _events2.default.H264_DATA_PARSING));
+    var _this = _possibleConstructorReturn(this, (h264Demuxer.__proto__ || Object.getPrototypeOf(h264Demuxer)).call(this, wfs, _events2.default.H264_DATA_PARSED));
 
     _this.config = _this.wfs.config || config;
     _this.wfs = wfs;
     _this.id = 'main';
-    var typeSupported = {
-      mp4: MediaSource.isTypeSupported('video/mp4') //,
-      // mp2t : wfs.config.enableMP2TPassThrough && MediaSource.isTypeSupported('video/mp2t')
-    };
 
     _this.remuxer = new _mp4Remuxer2.default(_this.wfs, _this.id, _this.config);
     _this.contiguous = true;
@@ -1104,18 +1098,13 @@ var h264Demuxer = function (_EventHandler) {
       return this.timestamp;
     }
   }, {
-    key: 'onH264DataParsing',
-    value: function onH264DataParsing(event) {
+    key: 'onH264DataParsed',
+    value: function onH264DataParsed(event) {
       this._parseAVCTrack(event.data);
-      if (this.browserType === 1) {
+      if (this.browserType === 1 || this._avcTrack.samples.length >= 20) {
         // Firefox
         this.remuxer.pushVideo(0, this.sn, this._avcTrack, this.timeOffset, this.contiguous);
         this.sn += 1;
-      } else {
-        if (this._avcTrack.samples.length >= 20) {
-          this.remuxer.pushVideo(0, this.sn, this._avcTrack, this.timeOffset, this.contiguous);
-          this.sn += 1;
-        }
       }
     }
   }, {
@@ -1346,7 +1335,7 @@ var h264Demuxer = function (_EventHandler) {
 
 exports.default = h264Demuxer;
 
-},{"../errors":6,"../event-handler":7,"../events":8,"../remux/mp4-remuxer":14,"./exp-golomb":4}],6:[function(require,module,exports){
+},{"../event-handler":7,"../events":8,"../remux/mp4-remuxer":13,"./exp-golomb":4}],6:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -1538,6 +1527,8 @@ module.exports = {
   FRAG_PARSING_INIT_SEGMENT: 'wfsFragParsingInitSegment',
   //------------------------------------------
   H264_DATA_PARSING: 'wfsH264DataParsing',
+
+  H264_DATA_PARSED: 'wfsH264DataParsed',
   //------------------------------------------
   WEBSOCKET_ATTACHED: 'wfsWebsocketAttached',
 
@@ -1630,134 +1621,9 @@ var _eventHandler = require('../event-handler');
 
 var _eventHandler2 = _interopRequireDefault(_eventHandler);
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+var _h264NalSlicesreader = require('../utils/h264-nal-slicesreader.js');
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; } /*
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                * File Loader
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               */
-
-
-var FileLoader = function (_EventHandler) {
-  _inherits(FileLoader, _EventHandler);
-
-  function FileLoader(wfs) {
-    _classCallCheck(this, FileLoader);
-
-    var _this = _possibleConstructorReturn(this, (FileLoader.__proto__ || Object.getPrototypeOf(FileLoader)).call(this, wfs, _events2.default.FRAG_LOADING, _events2.default.FILE_HEAD_LOADING, _events2.default.FILE_DATA_LOADING));
-
-    _this.loaders = {};
-    return _this;
-  }
-
-  _createClass(FileLoader, [{
-    key: 'destroy',
-    value: function destroy() {
-      for (var loaderName in this.loaders) {
-        var loader = this.loaders[loaderName];
-        if (loader) {
-          loader.destroy();
-        }
-      }
-      this.loaders = {};
-      _eventHandler2.default.prototype.destroy.call(this);
-    }
-  }, {
-    key: 'onFileHeadLoading',
-    value: function onFileHeadLoading(data) {
-      var config = this.wfs.config;
-      var loader = new config.loader(config);
-      var loaderContext = void 0,
-          loaderConfig = void 0,
-          loaderCallbacks = void 0;
-      loaderContext = { url: config.fmp4FileUrl };
-      loaderConfig = { maxRetry: 0, retryDelay: 0 };
-      loaderCallbacks = { onSuccess: this.fileloadheadsuccess.bind(this) };
-      loader.loadHead(loaderContext, loaderConfig, loaderCallbacks);
-    }
-  }, {
-    key: 'fileloadheadsuccess',
-    value: function fileloadheadsuccess(response) {
-      this.wfs.trigger(_events2.default.FILE_HEAD_LOADED, { size: response });
-    }
-  }, {
-    key: 'onFileDataLoading',
-    value: function onFileDataLoading(data) {
-      var config = this.wfs.config;
-      var loader = new config.loader(config);
-      var loaderContext = void 0,
-          loaderConfig = void 0,
-          loaderCallbacks = void 0;
-      loaderContext = { url: config.fmp4FileUrl, responseType: 'arraybuffer', progressData: false };
-      var start = data.fileStart,
-          end = data.fileEnd;
-      if (!isNaN(start) && !isNaN(end)) {
-        loaderContext.rangeStart = start;
-        loaderContext.rangeEnd = end;
-      }
-      loaderConfig = { timeout: config.fragLoadingTimeOut, maxRetry: 0, retryDelay: 0, maxRetryDelay: config.fragLoadingMaxRetryTimeout };
-      loaderCallbacks = { onSuccess: this.fileloaddatasuccess.bind(this) };
-      loader.load(loaderContext, loaderConfig, loaderCallbacks);
-    }
-  }, {
-    key: 'fileloaddatasuccess',
-    value: function fileloaddatasuccess(response, stats, context) {
-      this.wfs.trigger(_events2.default.FILE_DATA_LOADED, { payload: response.data, stats: stats });
-    }
-  }, {
-    key: 'loaderror',
-    value: function loaderror(response, context) {
-      var loader = context.loader;
-      if (loader) {
-        loader.abort();
-      }
-      this.loaders[context.type] = undefined;
-    }
-  }, {
-    key: 'loadtimeout',
-    value: function loadtimeout(stats, context) {
-      var loader = context.loader;
-      if (loader) {
-        loader.abort();
-      }
-      this.loaders[context.type] = undefined;
-    }
-  }, {
-    key: 'loadprogress',
-    value: function loadprogress(stats, context, data) {
-      var frag = context.frag;
-      frag.loaded = stats.loaded;
-    }
-  }]);
-
-  return FileLoader;
-}(_eventHandler2.default);
-
-exports.default = FileLoader;
-
-},{"../event-handler":7,"../events":8}],12:[function(require,module,exports){
-'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-var _events = require('../events');
-
-var _events2 = _interopRequireDefault(_events);
-
-var _eventHandler = require('../event-handler');
-
-var _eventHandler2 = _interopRequireDefault(_eventHandler);
-
-var _h264Demuxer = require('../demux/h264-demuxer');
-
-var _h264Demuxer2 = _interopRequireDefault(_h264Demuxer);
+var _h264NalSlicesreader2 = _interopRequireDefault(_h264NalSlicesreader);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -1778,7 +1644,7 @@ var WebsocketLoader = function (_EventHandler) {
     var _this = _possibleConstructorReturn(this, (WebsocketLoader.__proto__ || Object.getPrototypeOf(WebsocketLoader)).call(this, wfs, _events2.default.WEBSOCKET_ATTACHING, _events2.default.WEBSOCKET_DATA_UPLOADING, _events2.default.WEBSOCKET_MESSAGE_SENDING));
 
     _this.buf = null;
-    _this.h264Demuxer = new _h264Demuxer2.default(wfs);
+    _this.slicesReader = new _h264NalSlicesreader2.default(wfs);
     _this.mediaType = undefined;
     _this.channelName = undefined;
     return _this;
@@ -1787,6 +1653,8 @@ var WebsocketLoader = function (_EventHandler) {
   _createClass(WebsocketLoader, [{
     key: 'destroy',
     value: function destroy() {
+      !!this.client && this.client.close();
+      this.slicesReader.destroy();
       _eventHandler2.default.prototype.destroy.call(this);
     }
   }, {
@@ -1840,7 +1708,7 @@ var WebsocketLoader = function (_EventHandler) {
 
 exports.default = WebsocketLoader;
 
-},{"../demux/h264-demuxer":5,"../event-handler":7,"../events":8}],13:[function(require,module,exports){
+},{"../event-handler":7,"../events":8,"../utils/h264-nal-slicesreader.js":14}],12:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -2034,7 +1902,8 @@ var MP4 = function () {
     key: 'mfhd',
     value: function mfhd(sequenceNumber) {
       return MP4.box(MP4.types.mfhd, new Uint8Array([0x00, 0x00, 0x00, 0x00, // flags
-      sequenceNumber >> 24, sequenceNumber >> 16 & 0xFF, sequenceNumber >> 8 & 0xFF, sequenceNumber & 0xFF]));
+      sequenceNumber >> 24, sequenceNumber >> 16 & 0xFF, sequenceNumber >> 8 & 0xFF, sequenceNumber & 0xFF]) // sequence_number
+      );
     }
   }, {
     key: 'minf',
@@ -2262,9 +2131,11 @@ var MP4 = function () {
 
       return MP4.box(MP4.types.traf, MP4.box(MP4.types.tfhd, new Uint8Array([0x00, // version 0
       0x00, 0x00, 0x00, // flags
-      id >> 24, id >> 16 & 0XFF, id >> 8 & 0XFF, id & 0xFF])), MP4.box(MP4.types.tfdt, new Uint8Array([0x00, // version 0
+      id >> 24, id >> 16 & 0XFF, id >> 8 & 0XFF, id & 0xFF]) // track_ID
+      ), MP4.box(MP4.types.tfdt, new Uint8Array([0x00, // version 0
       0x00, 0x00, 0x00, // flags
-      baseMediaDecodeTime >> 24, baseMediaDecodeTime >> 16 & 0XFF, baseMediaDecodeTime >> 8 & 0XFF, baseMediaDecodeTime & 0xFF])), MP4.trun(track, sampleDependencyTable.length + 16 + // tfhd
+      baseMediaDecodeTime >> 24, baseMediaDecodeTime >> 16 & 0XFF, baseMediaDecodeTime >> 8 & 0XFF, baseMediaDecodeTime & 0xFF]) // baseMediaDecodeTime
+      ), MP4.trun(track, sampleDependencyTable.length + 16 + // tfhd
       16 + // tfdt
       8 + // traf header
       16 + // mfhd
@@ -2356,7 +2227,7 @@ var MP4 = function () {
 
 exports.default = MP4;
 
-},{}],14:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -2678,15 +2549,13 @@ var MP4Remuxer = function () {
         // in order to avoid overflowing the 32 bit counter for large duration, we use smaller timescale (timescale/gcd)
         // we just need to ensure that AAC sample duration will still be an integer (will be 1024/gcd)
         if (audioTrack.timescale * audioTrack.duration > Math.pow(2, 32)) {
-          (function () {
-            var greatestCommonDivisor = function greatestCommonDivisor(a, b) {
-              if (!b) {
-                return a;
-              }
-              return greatestCommonDivisor(b, a % b);
-            };
-            audioTrack.timescale = audioTrack.audiosamplerate / greatestCommonDivisor(audioTrack.audiosamplerate, 1024);
-          })();
+          var greatestCommonDivisor = function greatestCommonDivisor(a, b) {
+            if (!b) {
+              return a;
+            }
+            return greatestCommonDivisor(b, a % b);
+          };
+          audioTrack.timescale = audioTrack.audiosamplerate / greatestCommonDivisor(audioTrack.audiosamplerate, 1024);
         }
         _logger.logger.log('audio mp4 timescale :' + audioTrack.timescale);
         tracks.audio = {
@@ -3240,7 +3109,130 @@ var MP4Remuxer = function () {
 
 exports.default = MP4Remuxer;
 
-},{"../errors":6,"../events":8,"../helper/aac":9,"../remux/mp4-generator":13,"../utils/logger":15,"../utils/polyfill":16}],15:[function(require,module,exports){
+},{"../errors":6,"../events":8,"../helper/aac":9,"../remux/mp4-generator":12,"../utils/logger":15,"../utils/polyfill":16}],14:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _events = require('../events');
+
+var _events2 = _interopRequireDefault(_events);
+
+var _eventHandler = require('../event-handler');
+
+var _eventHandler2 = _interopRequireDefault(_eventHandler);
+
+var _h264Demuxer = require('../demux/h264-demuxer');
+
+var _h264Demuxer2 = _interopRequireDefault(_h264Demuxer);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; } /*
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                * H264 NAL Slicer
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                */
+
+
+var SlicesReader = function (_EventHandler) {
+    _inherits(SlicesReader, _EventHandler);
+
+    function SlicesReader(wfs) {
+        var config = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
+
+        _classCallCheck(this, SlicesReader);
+
+        var _this = _possibleConstructorReturn(this, (SlicesReader.__proto__ || Object.getPrototypeOf(SlicesReader)).call(this, wfs, _events2.default.H264_DATA_PARSING));
+
+        _this.config = _this.wfs.config || config;
+        _this.h264Demuxer = new _h264Demuxer2.default(wfs);
+        _this.wfs = wfs;
+        _this.lastBuf = null;
+        _this.nals = [];
+        return _this;
+    }
+
+    _createClass(SlicesReader, [{
+        key: 'destroy',
+        value: function destroy() {
+            this.lastBuf = null;
+            this.nals = [];
+            _eventHandler2.default.prototype.destroy.call(this);
+        }
+    }, {
+        key: '_read',
+        value: function _read(buffer) {
+            var typedAr = null;
+            this.nals = [];
+            if (!buffer || buffer.byteLength < 1) return;
+            if (this.lastBuf) {
+                typedAr = new Uint8Array(buffer.byteLength + this.lastBuf.length);
+                typedAr.set(this.lastBuf);
+                typedAr.set(new Uint8Array(buffer), this.lastBuf.length);
+            } else {
+                typedAr = new Uint8Array(buffer);
+            }
+            var lastNalEndPos = 0;
+            var b1 = -1; // byte before one
+            var b2 = -2; // byte before two
+            var nalStartPos = new Array();
+            for (var i = 0; i < typedAr.length; i += 2) {
+                var b_0 = typedAr[i];
+                var b_1 = typedAr[i + 1];
+                if (b1 == 0 && b_0 == 0 && b_1 == 0) {
+                    nalStartPos.push(i - 1);
+                } else if (b_1 == 1 && b_0 == 0 && b1 == 0 && b2 == 0) {
+                    nalStartPos.push(i - 2);
+                }
+                b2 = b_0;
+                b1 = b_1;
+            }
+            if (nalStartPos.length > 1) {
+                for (var i = 0; i < nalStartPos.length - 1; ++i) {
+                    this.nals.push(typedAr.subarray(nalStartPos[i], nalStartPos[i + 1] + 1));
+                    lastNalEndPos = nalStartPos[i + 1];
+                }
+            } else {
+                lastNalEndPos = nalStartPos[0];
+            }
+            if (lastNalEndPos != 0 && lastNalEndPos < typedAr.length) {
+                this.lastBuf = typedAr.subarray(lastNalEndPos);
+            } else {
+                if (!!!this.lastBuf) {
+                    this.lastBuf = typedAr;
+                }
+                var _newBuf = new Uint8Array(this.lastBuf.length + buffer.byteLength);
+                _newBuf.set(this.lastBuf);
+                _newBuf.set(new Uint8Array(buffer), this.lastBuf.length);
+                this.lastBuf = _newBuf;
+            }
+        }
+    }, {
+        key: 'onH264DataParsing',
+        value: function onH264DataParsing(event) {
+            this._read(event.data);
+            var $this = this;
+            this.nals.forEach(function (nal) {
+                $this.wfs.trigger(_events2.default.H264_DATA_PARSED, {
+                    data: nal
+                });
+            });
+        }
+    }]);
+
+    return SlicesReader;
+}(_eventHandler2.default);
+
+exports.default = SlicesReader;
+
+},{"../demux/h264-demuxer":5,"../event-handler":7,"../events":8}],15:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -3517,7 +3509,7 @@ exports.default = XhrLoader;
 
 },{}],18:[function(require,module,exports){
 /**
- * WFS interface, Jeff Yang 2016.9
+ * WFS interface, Jeff Yang 2016.10
  */
 'use strict';
 
@@ -3546,10 +3538,6 @@ var _events4 = _interopRequireDefault(_events3);
 var _xhrLoader = require('./utils/xhr-loader');
 
 var _xhrLoader2 = _interopRequireDefault(_xhrLoader);
-
-var _fileLoader = require('./loader/file-loader');
-
-var _fileLoader2 = _interopRequireDefault(_fileLoader);
 
 var _websocketLoader = require('./loader/websocket-loader');
 
@@ -3676,6 +3664,6 @@ var Wfs = function () {
 
 exports.default = Wfs;
 
-},{"./controller/buffer-controller":2,"./controller/flow-controller":3,"./events":8,"./loader/file-loader":11,"./loader/websocket-loader":12,"./utils/xhr-loader":17,"events":1}]},{},[10])(10)
+},{"./controller/buffer-controller":2,"./controller/flow-controller":3,"./events":8,"./loader/websocket-loader":11,"./utils/xhr-loader":17,"events":1}]},{},[10])(10)
 });
 //# sourceMappingURL=wfs.js.map
