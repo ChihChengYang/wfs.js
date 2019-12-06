@@ -11,7 +11,6 @@ import (
 	"fmt"
 	"github.com/gorilla/websocket"
 	"github.com/kardianos/osext"
-	"html/template"
 	"log"
 	"net/http"
 	"os"
@@ -42,13 +41,7 @@ var gHub *Hub
 var basePath string
 
 func indexHandler(w http.ResponseWriter, r *http.Request) {
-	t, err := template.ParseFiles(basePath + "/index.html")
-	if err != nil {
-		http.Error(w, err.Error(),
-			http.StatusInternalServerError)
-		return
-	}
-	t.Execute(w, "ws://"+r.Host+"/play")
+	http.ServeFile(w, r, basePath+"/index.html")
 }
 
 func dist(w http.ResponseWriter, r *http.Request) {
