@@ -23,7 +23,7 @@ func newHub() *Hub {
 }
 
 func (h *Hub) setHubConnName(conn *Connection) string {
-	u1 := uuid.NewV4()
+	u1, _ := uuid.NewV4()
 	h.clientsName[conn] = u1.String()
 	return u1.String()
 }
