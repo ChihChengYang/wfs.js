@@ -1,52 +1,47 @@
-
 wfs.js - html5 player for raw h.264 streams. 
 ================
  
- A javascript library which implements websocket client for watching and focusing on raw h.264 live streams in your browser that works directly on top of a standard HTML5 element and MediaSource Extensions. 
+A javascript library which implements websocket client for watching and focusing on raw h.264 live streams in your browser that works directly on top of a standard HTML5 element and MediaSource Extensions.
  
- It works by transmuxing H264 NAL unit into ISO BMFF (MP4) fragments.
+It works by transmuxing H264 NAL unit into ISO BMFF (MP4) fragments.
 
- Also,Implement a demo server to push video streams.   
+Also,Implement a demo server to push video streams.
  
 ##  Build
+
+```
 git clone https://github.com/ChihChengYang/wfs.js.git
+cd wfs.js
+```
 
-**wfs.js**  
+### wfs.js
 
-1. setup node.js/npm dev environement  
+Setup node.js/npm dev environment, then run:
 
-2. cd wfs.js  
+```
+npm install
+npm run build
+```
 
-3. npm install  
+### Demo server
 
-4. npm run build  
+Setup go's dev environment, then run:
 
- 
-**demo server**  
-
-Setup go's dev environement  
-
+```
 go get "github.com/gorilla/websocket"
 go get "github.com/satori/go.uuid"
 go get "github.com/kardianos/osext"
-
-./server/build_lite.sh  
-
+./server/build_lite.sh
+```
 
 Demo server serves with raw h.264 files,
 yet that can be easily transfered and connected to RTSP or other sources (h.264 streaming).
 
 ##  Demo
-1. run ./demo/wfs_server  
+1. run ./demo/wfs_server
 
-2. open a browser e.g. Chrome , 127.0.0.1:8888  
+2. open a browser e.g. Chrome , 127.0.0.1:8888
 
 ##  Reference
 
 [hls.js](https://github.com/dailymotion/hls.js "hls.js")
-
-	
-	
-
-
- 
