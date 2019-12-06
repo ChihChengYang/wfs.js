@@ -122,7 +122,7 @@ func (conn *Connection) appMP4Streaming() {
 				//------------------------------------------
 				smallArray := make([]byte, offs)
 				copy(smallArray[:], b[0:offs])
-				err := conn.ws.WriteMessage(2, smallArray)
+				err := conn.ws.WriteMessage(websocket.BinaryMessage, smallArray)
 				if err != nil {
 					fmt.Printf("conn.WriteMessage ERROR!!!\n")
 					flag = false
@@ -213,7 +213,7 @@ func (conn *Connection) app264Streaming() {
 					}
 				}
 				if sendFlag {
-					err := conn.ws.WriteMessage(2, smallArray)
+					err := conn.ws.WriteMessage(websocket.BinaryMessage, smallArray)
 					if err != nil {
 						fmt.Printf("conn.WriteMessage ERROR!!!\n")
 						flag = false
