@@ -26,9 +26,9 @@ git clone https://github.com/ChihChengYang/wfs.js.git
 
 Setup go's dev environement  
 
-go get "github.com/gorilla/websocket"  
-  
-go get "github.com/satori/go.uuid"  
+go get "github.com/gorilla/websocket"
+go get "github.com/satori/go.uuid"
+go get "github.com/kardianos/osext"
 
 ./server/build_lite.sh  
 

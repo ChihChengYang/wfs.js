@@ -10,6 +10,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gorilla/websocket"
+	"github.com/kardianos/osext"
 	"html/template"
 	"log"
 	"net/http"
@@ -38,9 +39,10 @@ type Connection struct {
 var fo *os.File
 var gConn *Connection
 var gHub *Hub
+var basePath string
 
 func indexHandler(w http.ResponseWriter, r *http.Request) {
-	t, err := template.ParseFiles("./index.html")
+	t, err := template.ParseFiles(basePath + "/index.html")
 	if err != nil {
 		http.Error(w, err.Error(),
 			http.StatusInternalServerError)
@@ -50,7 +52,7 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func dist(w http.ResponseWriter, r *http.Request) {
-	http.ServeFile(w, r, "../"+r.URL.Path[1:])
+	http.ServeFile(w, r, basePath+"/../"+r.URL.Path[1:])
 }
 
 func retrieveFileData(filename string, offset int, start int64) ([]byte, int, int64) {
@@ -95,13 +97,13 @@ func (conn *Connection) appReadCommand2() {
 			fmt.Println("appReadCommand--> ", u["t"].(string), u["v"].(string), u["c"].(string))
 
 			if u["c"].(string) == "ch1" {
-				conn.file264DataName = "yyyyyyy.264"
-				conn.file264SizeName = "yyyyyyy.txt"
+				conn.file264DataName = basePath + "/yyyyyyy.264"
+				conn.file264SizeName = basePath + "/yyyyyyy.txt"
 			}
 
 			if u["c"].(string) == "ch2" {
-				conn.file264DataName = "yyyyyyy.264"
-				conn.file264SizeName = "yyyyyyy.txt"
+				conn.file264DataName = basePath + "/yyyyyyy.264"
+				conn.file264SizeName = basePath + "/yyyyyyy.txt"
 			}
 			go conn.app264Streaming()
 		}
@@ -263,6 +265,11 @@ func play2(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+	folderPath, err := osext.ExecutableFolder()
+	if err != nil {
+		log.Fatal(err)
+	}
+	basePath = folderPath
 
 	runtime.GOMAXPROCS(runtime.NumCPU())
 
