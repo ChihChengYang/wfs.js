@@ -53,21 +53,6 @@ func dist(w http.ResponseWriter, r *http.Request) {
 	http.ServeFile(w, r, "../"+r.URL.Path[1:])
 }
 
-func createFile(path string) {
-	var _, err = os.Stat(path)
-	if os.IsNotExist(err) {
-		var file, err = os.Create(path)
-		if err != nil {
-			fmt.Println("createFile ERR!!!", err)
-		}
-		defer file.Close()
-	}
-}
-
-func deleteFile(path string) {
-	os.Remove(path)
-}
-
 func retrieveFileData(filename string, offset int, start int64) ([]byte, int, int64) {
 	file, err := os.Open(filename)
 	if err != nil {
