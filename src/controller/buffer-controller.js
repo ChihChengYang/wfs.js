@@ -135,7 +135,7 @@ class BufferController extends EventHandler {
     try {
       let sb = sourceBuffer['video'] = mediaSource.addSourceBuffer(mimeType);
       sb.addEventListener('updateend', this.onsbue);
-      track.buffer = sb;
+      tracks.buffer = sb;
     } catch(err) {
 
     }
