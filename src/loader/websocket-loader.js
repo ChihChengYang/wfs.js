@@ -45,6 +45,7 @@ class WebsocketLoader extends EventHandler {
   }
  
   receiveSocketMessage( event ){
+    if(document['hidden']) return;
     this.buf = new Uint8Array(event.data);
     var copy = new Uint8Array(this.buf);   
     
